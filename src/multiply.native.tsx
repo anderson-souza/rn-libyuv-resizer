@@ -1,5 +1,10 @@
 import LibyuvResizer from './NativeLibyuvResizer';
 
-export function multiply(a: number, b: number): number {
-  return LibyuvResizer.multiply(a, b);
+export function resize(
+  filePath: string,
+  targetWidth: number,
+  targetHeight: number,
+  quality: number
+): Promise<string> {
+  return LibyuvResizer.resize(filePath, targetWidth, targetHeight, quality);
 }

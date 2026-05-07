@@ -1,5 +1,12 @@
-export function multiply(_a: number, _b: number): number {
-  throw new Error(
-    "'react-native-libyuv-resizer' is only supported on native platforms."
+export function resize(
+  _filePath: string,
+  _targetWidth: number,
+  _targetHeight: number,
+  _quality: number
+): Promise<string> {
+  return Promise.reject(
+    new Error(
+      "'react-native-libyuv-resizer' is only supported on native platforms."
+    )
   );
 }

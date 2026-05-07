@@ -1,7 +1,12 @@
 import { TurboModuleRegistry, type TurboModule } from 'react-native';
 
 export interface Spec extends TurboModule {
-  multiply(a: number, b: number): number;
+  resize(
+    filePath: string,
+    targetWidth: number,
+    targetHeight: number,
+    quality: number
+  ): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('LibyuvResizer');
