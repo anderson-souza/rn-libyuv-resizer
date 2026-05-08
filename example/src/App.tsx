@@ -10,21 +10,58 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { resize } from 'react-native-libyuv-resizer';
+import type { RotationAngle } from 'react-native-libyuv-resizer';
 
 type ResizeResult = {
   outputPath: string;
   inputSize: { width: number; height: number };
   elapsedMs: number;
+  label: string;
 };
+
+type Mode = {
+  label: string;
+  width: number;
+  height: number;
+  rotation?: RotationAngle;
+};
+
+const MODES: Mode[] = [
+  { label: 'Resize only (320×240)', width: 320, height: 240 },
+  {
+    label: 'Resize + Rotate 90° (240×320)',
+    width: 240,
+    height: 320,
+    rotation: 90,
+  },
+  {
+    label: 'Resize + Rotate 180° (320×240)',
+    width: 320,
+    height: 240,
+    rotation: 180,
+  },
+  {
+    label: 'Resize + Rotate 270° (240×320)',
+    width: 240,
+    height: 320,
+    rotation: 270,
+  },
+  {
+    label: 'Resize + Rotate -90° → 270° (240×320)',
+    width: 240,
+    height: 320,
+    rotation: -90,
+  },
+];
 
 export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ResizeResult | null>(null);
+  const [results, setResults] = useState<ResizeResult[]>([]);
 
   async function pickAndResize() {
     setError(null);
-    setResult(null);
+    setResults([]);
 
     const response = await launchImageLibrary({
       mediaType: 'photo',
@@ -37,14 +74,20 @@ export default function App() {
 
     setLoading(true);
     try {
-      const start = Date.now();
-      const outputPath = await resize(filePath, 320, 240, 80);
-      const elapsedMs = Date.now() - start;
-      setResult({
-        outputPath,
-        inputSize: { width: asset.width ?? 0, height: asset.height ?? 0 },
-        elapsedMs,
-      });
+      const outputs: ResizeResult[] = [];
+      for (const mode of MODES) {
+        const start = Date.now();
+        const outputPath = await resize(filePath, mode.width, mode.height, 95, {
+          rotation: mode.rotation,
+        });
+        outputs.push({
+          outputPath,
+          inputSize: { width: asset.width ?? 0, height: asset.height ?? 0 },
+          elapsedMs: Date.now() - start,
+          label: mode.label,
+        });
+      }
+      setResults(outputs);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -54,30 +97,27 @@ export default function App() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>libyuv Resizer</Text>
+      <Text style={styles.title}>libyuv Resizer + Rotate</Text>
       <Button title="Pick image from gallery" onPress={pickAndResize} />
 
       {loading && <ActivityIndicator style={styles.gap} size="large" />}
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      {result && (
-        <View style={styles.gap}>
+      {results.map((r) => (
+        <View key={r.label} style={styles.gap}>
+          <Text style={styles.sectionTitle}>{r.label}</Text>
           <Text style={styles.label}>
-            Input: {result.inputSize.width}×{result.inputSize.height}
+            Input: {r.inputSize.width}×{r.inputSize.height}
           </Text>
-          <Text style={styles.label}>Output: 320×240</Text>
-          <Text style={styles.label}>Time: {result.elapsedMs}ms</Text>
-          <Text style={styles.label} numberOfLines={2}>
-            Path: {result.outputPath}
-          </Text>
+          <Text style={styles.label}>Time: {r.elapsedMs}ms</Text>
           <Image
-            source={{ uri: `file://${result.outputPath}` }}
+            source={{ uri: `file://${r.outputPath}` }}
             style={styles.preview}
             resizeMode="contain"
           />
         </View>
-      )}
+      ))}
     </ScrollView>
   );
 }
@@ -93,6 +133,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+    textAlign: 'center',
   },
   gap: {
     marginTop: 24,
@@ -111,7 +157,7 @@ const styles = StyleSheet.create({
   preview: {
     marginTop: 12,
     width: 320,
-    height: 240,
+    height: 320,
     borderWidth: 1,
     borderColor: '#ccc',
   },

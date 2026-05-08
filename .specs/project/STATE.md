@@ -12,7 +12,9 @@
 - [x] Update `android/build.gradle` with `externalNativeBuild`
 - [x] Design JS API for resize
 - [x] Implement Android native layer (JNI/C++ via `AndroidBitmap_lockPixels` + `libyuv::ARGBScale`)
+- [x] Image rotation — Android (scale-first + `libyuv::ARGBRotate` via single `nativeResizeAndRotate` JNI call)
 - [ ] Implement iOS native layer (Accelerate/vImage)
+- [ ] Image rotation — iOS (deferred; Android-only for now)
 
 ## Decisions
 
