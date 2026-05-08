@@ -20,6 +20,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
         rotation: Double,
         mode: String,
         outputPath: String,
+        filterMode: String,
         promise: Promise
     ) {
         try {
@@ -47,6 +48,10 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
             }
             if (mode !in setOf("contain", "cover", "stretch")) {
                 promise.reject("E_INVALID_MODE", "mode must be contain, cover, or stretch, got: $mode")
+                return
+            }
+            if (filterMode !in setOf("none", "linear", "bilinear", "box")) {
+                promise.reject("E_INVALID_FILTER_MODE", "filterMode must be none, linear, bilinear, or box, got: $filterMode")
                 return
             }
             if (outputPath.isNotEmpty()) {
@@ -97,10 +102,11 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
 
                 val dstBitmap = Bitmap.createBitmap(dstW, dstH, Bitmap.Config.ARGB_8888)
                 try {
+                    val filterModeInt = filterModeToInt(filterMode)
                     if (rot == 0) {
-                        nativeResize(srcBitmap, dstBitmap)
+                        nativeResize(srcBitmap, dstBitmap, filterModeInt)
                     } else {
-                        nativeResizeAndRotate(srcBitmap, dstBitmap, rot)
+                        nativeResizeAndRotate(srcBitmap, dstBitmap, rot, filterModeInt)
                     }
 
                     val ext = if (q == 100) "png" else "jpg"
@@ -122,6 +128,13 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
         }
     }
 
+    private fun filterModeToInt(mode: String): Int = when (mode) {
+        "none"     -> 0
+        "linear"   -> 1
+        "bilinear" -> 2
+        else       -> 3  // "box"
+    }
+
     private fun resolveOutputFile(inputFilePath: String, outputPath: String, ext: String): File {
         if (outputPath.isEmpty()) {
             return File(reactApplicationContext.cacheDir, "${UUID.randomUUID()}.$ext")
@@ -129,8 +142,8 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
         return File(outputPath, File(inputFilePath).name)
     }
 
-    private external fun nativeResize(srcBitmap: Bitmap, dstBitmap: Bitmap)
-    private external fun nativeResizeAndRotate(srcBitmap: Bitmap, dstBitmap: Bitmap, rotation: Int)
+    private external fun nativeResize(srcBitmap: Bitmap, dstBitmap: Bitmap, filterMode: Int)
+    private external fun nativeResizeAndRotate(srcBitmap: Bitmap, dstBitmap: Bitmap, rotation: Int, filterMode: Int)
 
     companion object {
         const val NAME = NativeLibyuvResizerSpec.NAME

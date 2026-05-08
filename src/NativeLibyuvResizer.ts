@@ -8,7 +8,8 @@ export interface Spec extends TurboModule {
     quality: number,
     rotation: number,
     mode: string,
-    outputPath: string
+    outputPath: string,
+    filterMode: string
   ): Promise<string>;
 }
 

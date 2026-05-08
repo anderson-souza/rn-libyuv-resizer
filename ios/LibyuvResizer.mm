@@ -14,6 +14,7 @@
       rotation:(double)rotation
           mode:(NSString *)mode
     outputPath:(NSString *)outputPath
+    filterMode:(NSString *)filterMode
        resolve:(RCTPromiseResolveBlock)resolve
         reject:(RCTPromiseRejectBlock)reject
 {

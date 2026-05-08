@@ -21,7 +21,8 @@ Java_com_libyuvresizer_LibyuvResizerModule_nativeResize(
     JNIEnv* env,
     jobject /* thiz */,
     jobject srcBitmap,
-    jobject dstBitmap
+    jobject dstBitmap,
+    jint filterMode
 ) {
     AndroidBitmapInfo srcInfo{}, dstInfo{};
     AndroidBitmap_getInfo(env, srcBitmap, &srcInfo);
@@ -47,7 +48,7 @@ Java_com_libyuvresizer_LibyuvResizerModule_nativeResize(
         static_cast<int>(srcInfo.width),  static_cast<int>(srcInfo.height),
         static_cast<uint8_t*>(dstPixels), static_cast<int>(dstInfo.stride),
         static_cast<int>(dstInfo.width),  static_cast<int>(dstInfo.height),
-        libyuv::kFilterBox
+        static_cast<libyuv::FilterModeEnum>(filterMode)
     );
 
     AndroidBitmap_unlockPixels(env, srcBitmap);
@@ -60,7 +61,8 @@ Java_com_libyuvresizer_LibyuvResizerModule_nativeResizeAndRotate(
     jobject /* thiz */,
     jobject srcBitmap,
     jobject dstBitmap,
-    jint rotation
+    jint rotation,
+    jint filterMode
 ) {
     AndroidBitmapInfo srcInfo{}, dstInfo{};
     AndroidBitmap_getInfo(env, srcBitmap, &srcInfo);
@@ -101,7 +103,7 @@ Java_com_libyuvresizer_LibyuvResizerModule_nativeResizeAndRotate(
         static_cast<int>(srcInfo.width), static_cast<int>(srcInfo.height),
         preBuf.ptr, static_cast<int>(preStride),
         static_cast<int>(preW), static_cast<int>(preH),
-        libyuv::kFilterBox
+        static_cast<libyuv::FilterModeEnum>(filterMode)
     );
 
     if (scaleResult != 0) {
