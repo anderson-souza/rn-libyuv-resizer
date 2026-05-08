@@ -1,26 +1,75 @@
 # react-native-libyuv-resizer
 
-A Package that resizes images using libyuv
+High-performance image resizer for React Native using libyuv (Android). Requires **New Architecture** (Turbo Modules).
 
 ## Installation
 
-
 ```sh
-npm install react-native-libyuv-resizer
+yarn add react-native-libyuv-resizer
 ```
 
+> **New Arch only.** Legacy bridge is not supported.
+
+## API
+
+### `resize(filePath, targetWidth, targetHeight, quality, options?): Promise<string>`
+
+| Parameter          | Type            | Description                                                                     |
+| ------------------ | --------------- | ------------------------------------------------------------------------------- |
+| `filePath`         | `string`        | Absolute path to source image                                                   |
+| `targetWidth`      | `number`        | Output width in pixels                                                          |
+| `targetHeight`     | `number`        | Output height in pixels                                                         |
+| `quality`          | `number`        | JPEG quality `0–100`                                                            |
+| `options.rotation` | `RotationAngle` | Optional rotation: `0 \| 90 \| 180 \| 270 \| -90 \| -180 \| -270` (default `0`) |
+
+Returns a `Promise<string>` — absolute path to the resized image.
+
+### Types
+
+```ts
+type RotationAngle = 0 | 90 | 180 | 270 | -90 | -180 | -270;
+
+interface ResizeOptions {
+  rotation?: RotationAngle;
+}
+```
 
 ## Usage
 
+```ts
+import { resize } from 'react-native-libyuv-resizer';
 
-```js
-import { multiply } from 'react-native-libyuv-resizer';
+// Basic resize
+const outputPath = await resize('/path/to/photo.jpg', 1280, 720, 85);
 
-// ...
-
-const result = multiply(3, 7);
+// Resize with rotation
+const outputPath = await resize('/path/to/photo.jpg', 1280, 720, 85, {
+  rotation: 90,
+});
 ```
 
+### With react-native-image-picker
+
+```ts
+import { launchImageLibrary } from 'react-native-image-picker';
+import { resize } from 'react-native-libyuv-resizer';
+
+const result = await launchImageLibrary({ mediaType: 'photo' });
+const asset = result.assets?.[0];
+
+if (asset?.uri) {
+  const resized = await resize(asset.uri, 800, 600, 80);
+  console.log('Resized image at:', resized);
+}
+```
+
+## Platform notes
+
+| Platform    | Backend                      |
+| ----------- | ---------------------------- |
+| Android     | libyuv (`ARGBScale`) via NDK |
+| iOS         | Not Implemented              |
+| Web / other | Throws — native only         |
 
 ## Contributing
 
@@ -31,7 +80,3 @@ const result = multiply(3, 7);
 ## License
 
 MIT
-
----
-
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
