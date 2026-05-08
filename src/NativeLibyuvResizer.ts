@@ -6,7 +6,8 @@ export interface Spec extends TurboModule {
     targetWidth: number,
     targetHeight: number,
     quality: number,
-    rotation: number
+    rotation: number,
+    mode: string
   ): Promise<string>;
 }
 

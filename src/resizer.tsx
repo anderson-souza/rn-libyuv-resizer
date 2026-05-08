@@ -1,6 +1,10 @@
-import type { ResizeOptions } from './multiply.native';
+import type { ResizeOptions } from './resizer.native';
 
-export type { RotationAngle, ResizeOptions } from './multiply.native';
+export type {
+  RotationAngle,
+  ResizeMode,
+  ResizeOptions,
+} from './resizer.native';
 
 export function resize(
   _filePath: string,

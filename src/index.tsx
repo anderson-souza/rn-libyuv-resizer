@@ -1,2 +1,2 @@
-export { resize } from './multiply';
-export type { RotationAngle, ResizeOptions } from './multiply';
+export { resize } from './resizer';
+export type { RotationAngle, ResizeMode, ResizeOptions } from './resizer';
