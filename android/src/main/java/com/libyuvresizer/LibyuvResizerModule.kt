@@ -19,6 +19,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
         quality: Double,
         rotation: Double,
         mode: String,
+        outputPath: String,
         promise: Promise
     ) {
         try {
@@ -47,6 +48,17 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
             if (mode !in setOf("contain", "cover", "stretch")) {
                 promise.reject("E_INVALID_MODE", "mode must be contain, cover, or stretch, got: $mode")
                 return
+            }
+            if (outputPath.isNotEmpty()) {
+                val dir = File(outputPath)
+                if (!dir.exists()) {
+                    promise.reject("E_INVALID_OUTPUT_PATH", "Output directory does not exist: $outputPath")
+                    return
+                }
+                if (!dir.isDirectory) {
+                    promise.reject("E_INVALID_OUTPUT_PATH", "outputPath must be a directory, not a file: $outputPath")
+                    return
+                }
             }
 
             val decodeOpts = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888 }
@@ -92,7 +104,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
                     }
 
                     val ext = if (q == 100) "png" else "jpg"
-                    val outFile = File(reactApplicationContext.cacheDir, "${UUID.randomUUID()}.$ext")
+                    val outFile = resolveOutputFile(filePath, outputPath, ext)
                     FileOutputStream(outFile).use { fos ->
                         val fmt = if (q == 100) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
                         dstBitmap.compress(fmt, q, fos)
@@ -108,6 +120,13 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
         } catch (e: Exception) {
             promise.reject("E_UNKNOWN", e.message ?: "Unknown error")
         }
+    }
+
+    private fun resolveOutputFile(inputFilePath: String, outputPath: String, ext: String): File {
+        if (outputPath.isEmpty()) {
+            return File(reactApplicationContext.cacheDir, "${UUID.randomUUID()}.$ext")
+        }
+        return File(outputPath, File(inputFilePath).name)
     }
 
     private external fun nativeResize(srcBitmap: Bitmap, dstBitmap: Bitmap)

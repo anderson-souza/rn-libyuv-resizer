@@ -13,6 +13,7 @@
 - [x] Design JS API for resize
 - [x] Implement Android native layer (JNI/C++ via `AndroidBitmap_lockPixels` + `libyuv::ARGBScale`)
 - [x] Image rotation — Android (scale-first + `libyuv::ARGBRotate` via single `nativeResizeAndRotate` JNI call)
+- [x] Custom output path — `outputPath?: string` in `ResizeOptions`; Android validates + saves; iOS stub added
 - [ ] Implement iOS native layer (Accelerate/vImage)
 - [ ] Image rotation — iOS (deferred; Android-only for now)
 
@@ -29,6 +30,7 @@
 | `kFilterBox` filter | Primary use case is downscale; box filter highest quality for shrinking |
 | File encode/decode in Kotlin | Android codecs hardware-accelerated; keeps C++ stateless |
 | quality=100 → PNG, else JPEG | Lossless path available without separate API param |
+| `outputPath=''` sentinel for absent param | TurboModule bridge requires fixed-arity positional args; no nullable strings |
 
 ## Blockers
 

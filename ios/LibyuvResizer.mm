@@ -7,6 +7,19 @@
     return result;
 }
 
+- (void)resize:(NSString *)filePath
+   targetWidth:(double)targetWidth
+  targetHeight:(double)targetHeight
+       quality:(double)quality
+      rotation:(double)rotation
+          mode:(NSString *)mode
+    outputPath:(NSString *)outputPath
+       resolve:(RCTPromiseResolveBlock)resolve
+        reject:(RCTPromiseRejectBlock)reject
+{
+    reject(@"E_NOT_IMPLEMENTED", @"resize is not yet implemented on iOS", nil);
+}
+
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params
 {

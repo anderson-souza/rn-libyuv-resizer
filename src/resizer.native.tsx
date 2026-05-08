@@ -6,6 +6,7 @@ export type ResizeMode = 'contain' | 'cover' | 'stretch';
 export interface ResizeOptions {
   rotation?: RotationAngle;
   mode?: ResizeMode;
+  outputPath?: string;
 }
 
 const VALID_MODES: ResizeMode[] = ['contain', 'cover', 'stretch'];
@@ -33,6 +34,7 @@ export function resize(
     targetHeight,
     quality,
     rotation,
-    mode
+    mode,
+    options?.outputPath ?? ''
   );
 }

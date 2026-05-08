@@ -29,7 +29,8 @@ describe('resize mode', () => {
         400,
         80,
         0,
-        'contain'
+        'contain',
+        ''
       );
     });
 
@@ -41,7 +42,8 @@ describe('resize mode', () => {
         400,
         80,
         0,
-        'contain'
+        'contain',
+        ''
       );
     });
 
@@ -53,7 +55,8 @@ describe('resize mode', () => {
         400,
         80,
         0,
-        'contain'
+        'contain',
+        ''
       );
     });
   });
@@ -67,7 +70,8 @@ describe('resize mode', () => {
         400,
         80,
         0,
-        'cover'
+        'cover',
+        ''
       );
     });
   });
@@ -81,7 +85,8 @@ describe('resize mode', () => {
         400,
         80,
         0,
-        'stretch'
+        'stretch',
+        ''
       );
     });
   });
@@ -113,8 +118,67 @@ describe('resize mode', () => {
         400,
         80,
         270,
-        'stretch'
+        'stretch',
+        ''
       );
     });
+  });
+});
+
+describe('outputPath', () => {
+  it('omitting outputPath passes empty string to native', async () => {
+    await resize('/img.jpg', 400, 400, 80);
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      ''
+    );
+  });
+
+  it('provided outputPath is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { outputPath: '/tmp/out' });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '/tmp/out'
+    );
+  });
+
+  it('empty string outputPath passes empty string to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { outputPath: '' });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      ''
+    );
+  });
+
+  it('outputPath combined with mode and rotation', async () => {
+    await resize('/img.jpg', 800, 600, 90, {
+      mode: 'cover',
+      rotation: 90,
+      outputPath: '/sdcard/Pictures',
+    });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      800,
+      600,
+      90,
+      90,
+      'cover',
+      '/sdcard/Pictures'
+    );
   });
 });
