@@ -30,7 +30,8 @@ describe('resize mode', () => {
         80,
         0,
         'contain',
-        ''
+        '',
+        'box'
       );
     });
 
@@ -43,7 +44,8 @@ describe('resize mode', () => {
         80,
         0,
         'contain',
-        ''
+        '',
+        'box'
       );
     });
 
@@ -56,7 +58,8 @@ describe('resize mode', () => {
         80,
         0,
         'contain',
-        ''
+        '',
+        'box'
       );
     });
   });
@@ -71,7 +74,8 @@ describe('resize mode', () => {
         80,
         0,
         'cover',
-        ''
+        '',
+        'box'
       );
     });
   });
@@ -86,7 +90,8 @@ describe('resize mode', () => {
         80,
         0,
         'stretch',
-        ''
+        '',
+        'box'
       );
     });
   });
@@ -119,7 +124,8 @@ describe('resize mode', () => {
         80,
         270,
         'stretch',
-        ''
+        '',
+        'box'
       );
     });
   });
@@ -135,7 +141,8 @@ describe('outputPath', () => {
       80,
       0,
       'contain',
-      ''
+      '',
+      'box'
     );
   });
 
@@ -148,7 +155,8 @@ describe('outputPath', () => {
       80,
       0,
       'contain',
-      '/tmp/out'
+      '/tmp/out',
+      'box'
     );
   });
 
@@ -161,7 +169,8 @@ describe('outputPath', () => {
       80,
       0,
       'contain',
-      ''
+      '',
+      'box'
     );
   });
 
@@ -178,7 +187,8 @@ describe('outputPath', () => {
       90,
       90,
       'cover',
-      '/sdcard/Pictures'
+      '/sdcard/Pictures',
+      'box'
     );
   });
 });
