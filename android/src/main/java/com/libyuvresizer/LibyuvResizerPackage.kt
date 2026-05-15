@@ -1,13 +1,12 @@
 package com.libyuvresizer
 
-import com.facebook.react.BaseReactPackage
+import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.model.ReactModuleInfo
 import com.facebook.react.module.model.ReactModuleInfoProvider
-import java.util.HashMap
 
-class LibyuvResizerPackage : BaseReactPackage() {
+class LibyuvResizerPackage : TurboReactPackage() {
   override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
     return if (name == LibyuvResizerModule.NAME) {
       LibyuvResizerModule(reactContext)
@@ -24,7 +23,7 @@ class LibyuvResizerPackage : BaseReactPackage() {
         canOverrideExistingModule = false,
         needsEagerInit = false,
         isCxxModule = false,
-        isTurboModule = true
+        isTurboModule = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
       )
     )
   }

@@ -4,11 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.module.annotations.ReactModule
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
 import androidx.core.graphics.createBitmap
 
+@ReactModule(name = LibyuvResizerModule.NAME)
 class LibyuvResizerModule(reactContext: ReactApplicationContext) :
   NativeLibyuvResizerSpec(reactContext) {
 

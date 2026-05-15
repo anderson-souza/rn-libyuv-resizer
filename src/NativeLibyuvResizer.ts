@@ -1,4 +1,8 @@
-import { TurboModuleRegistry, type TurboModule } from 'react-native';
+import {
+  NativeModules,
+  TurboModuleRegistry,
+  type TurboModule,
+} from 'react-native';
 
 /**
  * Turbo Module contract for the native `LibyuvResizer` implementation.
@@ -37,4 +41,17 @@ export interface Spec extends TurboModule {
   ): Promise<string>;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('LibyuvResizer');
+const isTurboModuleEnabled =
+  (globalThis as Record<string, unknown>).__turboModuleProxy != null;
+
+const LibyuvResizerModule: Spec = isTurboModuleEnabled
+  ? TurboModuleRegistry.getEnforcing<Spec>('LibyuvResizer')
+  : (NativeModules.LibyuvResizer as Spec);
+
+if (!LibyuvResizerModule) {
+  throw new Error(
+    'react-native-libyuv-resizer: native module not found. Did you forget to link the library?'
+  );
+}
+
+export default LibyuvResizerModule;

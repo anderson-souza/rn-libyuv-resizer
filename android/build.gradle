@@ -43,6 +43,12 @@ android {
 
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+    buildConfigField(
+      "boolean",
+      "IS_NEW_ARCHITECTURE_ENABLED",
+      project.hasProperty("newArchEnabled") ? project.getProperty("newArchEnabled") : "false"
+    )
+
     externalNativeBuild {
       cmake {
         cppFlags "-O2 -frtti -fexceptions -Wall -fstack-protector-all"
