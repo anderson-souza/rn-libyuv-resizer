@@ -10,7 +10,8 @@ data class ResizeParams(
   val rotation: Int,
   val mode: String,
   val outputPath: String,
-  val filterMode: String
+  val filterMode: String,
+  val scaleConstraint: String = ""
 )
 
 sealed class ValidationResult {
@@ -22,6 +23,7 @@ object ResizeValidator {
   private val VALID_MODES = setOf("contain", "cover", "stretch")
   private val VALID_FILTER_MODES = setOf("none", "linear", "bilinear", "box")
   private val VALID_ROTATIONS = setOf(0, 90, 180, 270)
+  private val VALID_SCALE_CONSTRAINTS = setOf("", "onlyScaleUp", "onlyScaleDown")
 
   fun validate(params: ResizeParams): ValidationResult {
     if (!File(params.filePath).exists())
@@ -44,6 +46,11 @@ object ResizeValidator {
       return ValidationResult.Invalid(
         "E_INVALID_FILTER_MODE",
         "filterMode must be none, linear, bilinear, or box, got: ${params.filterMode}"
+      )
+    if (params.scaleConstraint !in VALID_SCALE_CONSTRAINTS)
+      return ValidationResult.Invalid(
+        "E_INVALID_SCALE_CONSTRAINT",
+        "scaleConstraint must be onlyScaleUp or onlyScaleDown, got: ${params.scaleConstraint}"
       )
     if (params.outputPath.isNotEmpty()) {
       val dir = File(params.outputPath)

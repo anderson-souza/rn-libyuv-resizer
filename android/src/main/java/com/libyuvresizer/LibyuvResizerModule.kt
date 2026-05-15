@@ -39,6 +39,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
     mode: String,
     outputPath: String,
     filterMode: String,
+    scaleConstraint: String,
     promise: Promise
   ) {
     try {
@@ -47,7 +48,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
       val q = quality.toInt()
       val rot = rotation.toInt()
 
-      val params = ResizeParams(filePath, targetW, targetH, q, rot, mode, outputPath, filterMode)
+      val params = ResizeParams(filePath, targetW, targetH, q, rot, mode, outputPath, filterMode, scaleConstraint)
       when (val result = ResizeValidator.validate(params)) {
         is ValidationResult.Invalid -> {
           promise.reject(result.code, result.message)
@@ -60,6 +61,18 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
 
       val boundsOpts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
       BitmapFactory.decodeFile(filePath, boundsOpts)
+
+      val boundsW = boundsOpts.outWidth
+      val boundsH = boundsOpts.outHeight
+      val skip = when (scaleConstraint) {
+        "onlyScaleDown" -> targetW > boundsW || targetH > boundsH
+        "onlyScaleUp"   -> targetW < boundsW || targetH < boundsH
+        else            -> false
+      }
+      if (skip) {
+        promise.resolve(filePath)
+        return
+      }
 
       val decodeOpts = BitmapFactory.Options().apply {
         inSampleSize =

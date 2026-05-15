@@ -3,16 +3,22 @@ import LibyuvResizer from './NativeLibyuvResizer';
 export type RotationAngle = 0 | 90 | 180 | 270 | -90 | -180 | -270;
 export type ResizeMode = 'contain' | 'cover' | 'stretch';
 export type FilterMode = 'none' | 'linear' | 'bilinear' | 'box';
+export type ScaleConstraint = 'onlyScaleUp' | 'onlyScaleDown';
 
 export interface ResizeOptions {
   rotation?: RotationAngle;
   mode?: ResizeMode;
   outputPath?: string;
   filterMode?: FilterMode;
+  scaleConstraint?: ScaleConstraint;
 }
 
 const VALID_MODES: ResizeMode[] = ['contain', 'cover', 'stretch'];
 const VALID_FILTER_MODES: FilterMode[] = ['none', 'linear', 'bilinear', 'box'];
+const VALID_SCALE_CONSTRAINTS: ScaleConstraint[] = [
+  'onlyScaleUp',
+  'onlyScaleDown',
+];
 
 function toCanonicalAngle(angle: RotationAngle): 0 | 90 | 180 | 270 {
   return (((angle % 360) + 360) % 360) as 0 | 90 | 180 | 270;
@@ -37,6 +43,15 @@ export function resize(
       new TypeError(`Invalid filter mode: '${filterMode}'`)
     );
   }
+  const scaleConstraint = options?.scaleConstraint ?? '';
+  if (
+    scaleConstraint !== '' &&
+    !VALID_SCALE_CONSTRAINTS.includes(scaleConstraint as ScaleConstraint)
+  ) {
+    return Promise.reject(
+      new TypeError(`Invalid scaleConstraint: '${scaleConstraint}'`)
+    );
+  }
   return LibyuvResizer.resize(
     filePath,
     targetWidth,
@@ -45,6 +60,7 @@ export function resize(
     rotation,
     mode,
     options?.outputPath ?? '',
-    filterMode
+    filterMode,
+    scaleConstraint
   );
 }

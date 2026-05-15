@@ -4,6 +4,7 @@ export type {
   RotationAngle,
   ResizeMode,
   ResizeOptions,
+  ScaleConstraint,
 } from './resizer.native';
 
 export function resize(

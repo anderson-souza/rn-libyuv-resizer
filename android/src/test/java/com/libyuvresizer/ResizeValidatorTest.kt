@@ -172,4 +172,41 @@ class ResizeValidatorTest {
     val result = ResizeValidator.validate(validParams(file.absolutePath).copy(filterMode = "cubic")) as ValidationResult.Invalid
     assertTrue(result.message.contains("cubic"))
   }
+
+  @Test
+  fun `empty scaleConstraint accepted`() {
+    val file = tmp.newFile("image.jpg")
+    assertEquals(ValidationResult.Valid, ResizeValidator.validate(validParams(file.absolutePath).copy(scaleConstraint = "")))
+  }
+
+  @Test
+  fun `onlyScaleDown scaleConstraint accepted`() {
+    val file = tmp.newFile("image.jpg")
+    assertEquals(ValidationResult.Valid, ResizeValidator.validate(validParams(file.absolutePath).copy(scaleConstraint = "onlyScaleDown")))
+  }
+
+  @Test
+  fun `onlyScaleUp scaleConstraint accepted`() {
+    val file = tmp.newFile("image.jpg")
+    assertEquals(ValidationResult.Valid, ResizeValidator.validate(validParams(file.absolutePath).copy(scaleConstraint = "onlyScaleUp")))
+  }
+
+  @Test
+  fun `invalid scaleConstraint returns E_INVALID_SCALE_CONSTRAINT`() {
+    val file = tmp.newFile("image.jpg")
+    assertCode("E_INVALID_SCALE_CONSTRAINT", validParams(file.absolutePath).copy(scaleConstraint = "both"))
+  }
+
+  @Test
+  fun `uppercase scaleConstraint returns E_INVALID_SCALE_CONSTRAINT`() {
+    val file = tmp.newFile("image.jpg")
+    assertCode("E_INVALID_SCALE_CONSTRAINT", validParams(file.absolutePath).copy(scaleConstraint = "ONLYSCALEUP"))
+  }
+
+  @Test
+  fun `E_INVALID_SCALE_CONSTRAINT message includes got value`() {
+    val file = tmp.newFile("image.jpg")
+    val result = ResizeValidator.validate(validParams(file.absolutePath).copy(scaleConstraint = "both")) as ValidationResult.Invalid
+    assertTrue(result.message.contains("both"))
+  }
 }

@@ -15,6 +15,7 @@
           mode:(NSString *)mode
     outputPath:(NSString *)outputPath
     filterMode:(NSString *)filterMode
+scaleConstraint:(NSString *)scaleConstraint
        resolve:(RCTPromiseResolveBlock)resolve
         reject:(RCTPromiseRejectBlock)reject
 {

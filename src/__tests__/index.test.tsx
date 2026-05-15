@@ -31,7 +31,8 @@ describe('resize mode', () => {
         0,
         'contain',
         '',
-        'box'
+        'box',
+        ''
       );
     });
 
@@ -45,7 +46,8 @@ describe('resize mode', () => {
         0,
         'contain',
         '',
-        'box'
+        'box',
+        ''
       );
     });
 
@@ -59,7 +61,8 @@ describe('resize mode', () => {
         0,
         'contain',
         '',
-        'box'
+        'box',
+        ''
       );
     });
   });
@@ -75,7 +78,8 @@ describe('resize mode', () => {
         0,
         'cover',
         '',
-        'box'
+        'box',
+        ''
       );
     });
   });
@@ -91,7 +95,8 @@ describe('resize mode', () => {
         0,
         'stretch',
         '',
-        'box'
+        'box',
+        ''
       );
     });
   });
@@ -125,7 +130,8 @@ describe('resize mode', () => {
         270,
         'stretch',
         '',
-        'box'
+        'box',
+        ''
       );
     });
   });
@@ -142,7 +148,8 @@ describe('outputPath', () => {
       0,
       'contain',
       '',
-      'box'
+      'box',
+      ''
     );
   });
 
@@ -156,7 +163,8 @@ describe('outputPath', () => {
       0,
       'contain',
       '/tmp/out',
-      'box'
+      'box',
+      ''
     );
   });
 
@@ -170,7 +178,8 @@ describe('outputPath', () => {
       0,
       'contain',
       '',
-      'box'
+      'box',
+      ''
     );
   });
 
@@ -188,7 +197,70 @@ describe('outputPath', () => {
       90,
       'cover',
       '/sdcard/Pictures',
-      'box'
+      'box',
+      ''
     );
+  });
+});
+
+describe('scaleConstraint', () => {
+  it('onlyScaleDown is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, {
+      scaleConstraint: 'onlyScaleDown',
+    });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      'onlyScaleDown'
+    );
+  });
+
+  it('onlyScaleUp is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { scaleConstraint: 'onlyScaleUp' });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      'onlyScaleUp'
+    );
+  });
+
+  it('omitting scaleConstraint passes empty string to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, {});
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      ''
+    );
+  });
+
+  it('invalid scaleConstraint throws TypeError and does not call native', async () => {
+    await expect(
+      resize('/img.jpg', 400, 400, 80, { scaleConstraint: 'both' as any })
+    ).rejects.toThrow(TypeError);
+    expect(mockResize).not.toHaveBeenCalled();
+  });
+
+  it('invalid scaleConstraint error message includes the value', async () => {
+    await expect(
+      resize('/img.jpg', 400, 400, 80, { scaleConstraint: 'both' as any })
+    ).rejects.toThrow("Invalid scaleConstraint: 'both'");
   });
 });
