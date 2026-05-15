@@ -14,13 +14,16 @@ yarn add react-native-libyuv-resizer
 
 ### `resize(filePath, targetWidth, targetHeight, quality, options?): Promise<string>`
 
-| Parameter          | Type            | Description                                                                     |
-| ------------------ | --------------- | ------------------------------------------------------------------------------- |
-| `filePath`         | `string`        | Absolute path to source image                                                   |
-| `targetWidth`      | `number`        | Output width in pixels                                                          |
-| `targetHeight`     | `number`        | Output height in pixels                                                         |
-| `quality`          | `number`        | JPEG quality `0–100`                                                            |
-| `options.rotation` | `RotationAngle` | Optional rotation: `0 \| 90 \| 180 \| 270 \| -90 \| -180 \| -270` (default `0`) |
+| Parameter              | Type            | Default     | Description                                                                        |
+| ---------------------- | --------------- | ----------- | ---------------------------------------------------------------------------------- |
+| `filePath`             | `string`        | —           | Absolute path to source image                                                      |
+| `targetWidth`          | `number`        | —           | Output width in pixels                                                             |
+| `targetHeight`         | `number`        | —           | Output height in pixels                                                            |
+| `quality`              | `number`        | —           | JPEG quality `0–100`                                                               |
+| `options.rotation`     | `RotationAngle` | `0`         | Rotation applied before resize: `0 \| 90 \| 180 \| 270 \| -90 \| -180 \| -270`  |
+| `options.mode`         | `ResizeMode`    | `'contain'` | How the image fits the target box: `'contain' \| 'cover' \| 'stretch'`            |
+| `options.filterMode`   | `FilterMode`    | `'box'`     | Scaling filter: `'none' \| 'linear' \| 'bilinear' \| 'box'`                      |
+| `options.outputPath`   | `string`        | auto        | Absolute path for the output file. Auto-generated if omitted.                     |
 
 Returns a `Promise<string>` — absolute path to the resized image.
 
@@ -28,11 +31,33 @@ Returns a `Promise<string>` — absolute path to the resized image.
 
 ```ts
 type RotationAngle = 0 | 90 | 180 | 270 | -90 | -180 | -270;
+type ResizeMode = 'contain' | 'cover' | 'stretch';
+type FilterMode = 'none' | 'linear' | 'bilinear' | 'box';
 
 interface ResizeOptions {
   rotation?: RotationAngle;
+  mode?: ResizeMode;
+  filterMode?: FilterMode;
+  outputPath?: string;
 }
 ```
+
+### Resize modes
+
+| Mode        | Behavior                                                              |
+| ----------- | --------------------------------------------------------------------- |
+| `contain`   | Fits entirely within the target box, preserving aspect ratio          |
+| `cover`     | Fills the target box and crops excess, preserving aspect ratio        |
+| `stretch`   | Stretches to exact target dimensions, ignoring aspect ratio           |
+
+### Filter modes
+
+| Mode        | Quality / Speed trade-off                                             |
+| ----------- | --------------------------------------------------------------------- |
+| `none`      | Nearest-neighbor — fastest, lowest quality                            |
+| `linear`    | Linear interpolation                                                  |
+| `bilinear`  | Bilinear interpolation                                                |
+| `box`       | Box filter — best quality for downscaling *(default)*                 |
 
 ## Usage
 
@@ -42,9 +67,16 @@ import { resize } from 'react-native-libyuv-resizer';
 // Basic resize
 const outputPath = await resize('/path/to/photo.jpg', 1280, 720, 85);
 
-// Resize with rotation
+// Resize with options
 const outputPath = await resize('/path/to/photo.jpg', 1280, 720, 85, {
   rotation: 90,
+  mode: 'cover',
+  filterMode: 'bilinear',
+});
+
+// Custom output path
+const outputPath = await resize('/path/to/photo.jpg', 800, 600, 80, {
+  outputPath: '/path/to/output.jpg',
 });
 ```
 
@@ -58,7 +90,7 @@ const result = await launchImageLibrary({ mediaType: 'photo' });
 const asset = result.assets?.[0];
 
 if (asset?.uri) {
-  const resized = await resize(asset.uri, 800, 600, 80);
+  const resized = await resize(asset.uri, 800, 600, 80, { mode: 'cover' });
   console.log('Resized image at:', resized);
 }
 ```
@@ -68,7 +100,7 @@ if (asset?.uri) {
 | Platform    | Backend                      |
 | ----------- | ---------------------------- |
 | Android     | libyuv (`ARGBScale`) via NDK |
-| iOS         | Not Implemented              |
+| iOS         | Not implemented              |
 | Web / other | Throws — native only         |
 
 ## Contributing

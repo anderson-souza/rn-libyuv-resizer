@@ -1,7 +1,7 @@
 {
   "name": "react-native-libyuv-resizer",
   "version": "0.1.0",
-  "description": "A Package that resizes images using libyuv",
+  "description": "High-performance image resizer for React Native using libyuv (Android, New Architecture)",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -42,8 +42,13 @@
   },
   "keywords": [
     "react-native",
-    "ios",
-    "android"
+    "android",
+    "image",
+    "resize",
+    "libyuv",
+    "turbo-module",
+    "new-architecture",
+    "performance"
   ],
   "repository": {
     "type": "git",
