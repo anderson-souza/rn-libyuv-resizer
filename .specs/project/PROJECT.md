@@ -38,4 +38,7 @@
 - Web / Expo managed workflow support
 - YUV↔RGB color space conversion as a standalone API
 - Crop, flip, or any other transform beyond resize + rotate
-- Legacy React Native architecture (bridge modules)
+
+**In scope (added):**
+
+- Legacy React Native bridge support alongside New Architecture (dual-compat via `TurboReactPackage` + `@ReactModule` + `RCT_EXPORT_METHOD`)

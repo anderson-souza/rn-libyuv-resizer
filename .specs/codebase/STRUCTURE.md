@@ -9,19 +9,39 @@ rn-libyuv-resizer/
 ├── src/                          # TypeScript library source
 │   ├── NativeLibyuvResizer.ts    # TurboModule spec (codegen input)
 │   ├── index.tsx                 # Public barrel export
-│   ├── multiply.native.tsx       # Native platform implementation
-│   ├── multiply.tsx              # Web/non-native fallback
+│   ├── resizer.native.tsx        # Native platform implementation + validation
+│   ├── resizer.tsx               # Web/non-native fallback
 │   └── __tests__/
-│       └── index.test.tsx
+│       ├── index.test.tsx
+│       └── NativeLibyuvResizer.test.ts
 ├── android/
-│   ├── build.gradle              # Android library config (no CMake yet)
-│   └── src/main/
-│       └── java/com/libyuvresizer/
-│           ├── LibyuvResizerModule.kt
-│           └── LibyuvResizerPackage.kt
+│   ├── CMakeLists.txt            # C++ build: libyuv submodule + JNI lib
+│   ├── build.gradle              # Android library config with externalNativeBuild
+│   └── src/
+│       ├── main/
+│       │   ├── cpp/
+│       │   │   └── LibyuvResizerModule.cpp  # JNI impl: ARGBScale + ARGBRotate
+│       │   └── java/com/libyuvresizer/
+│       │       ├── LibyuvResizerModule.kt   # TurboModule + @ReactModule
+│       │       ├── LibyuvResizerPackage.kt  # TurboReactPackage registration
+│       │       ├── DimensionCalculator.kt   # Pure contain/cover/stretch math
+│       │       └── ResizeValidator.kt       # Input validation (returns sealed result)
+│       ├── test/java/com/libyuvresizer/
+│       │   ├── DimensionCalculatorTest.kt
+│       │   └── ResizeValidatorTest.kt
+│       └── androidTest/java/com/libyuvresizer/
+│           ├── LibyuvResizerModuleIntegrationTest.kt
+│           ├── LibyuvResizerModuleErrorTest.kt
+│           ├── LibyuvResizerModuleFilterModeTest.kt
+│           ├── LibyuvResizerModuleOutputPathTest.kt
+│           ├── LibyuvResizerModuleRotationTest.kt
+│           ├── FakePromise.kt
+│           ├── FakeReactContext.kt
+│           └── TestFixtures.kt
 ├── ios/
 │   ├── LibyuvResizer.h
-│   └── LibyuvResizer.mm
+│   └── LibyuvResizer.mm          # Turbo + legacy bridge via RCT_EXPORT_METHOD
+├── libyuv/                       # Git submodule (Google libyuv)
 ├── example/                      # Example RN app (separate yarn workspace)
 │   ├── android/
 │   ├── ios/
@@ -33,9 +53,9 @@ rn-libyuv-resizer/
 ├── .github/
 │   ├── workflows/ci.yml
 │   └── actions/setup/action.yml
-├── LibyuvResizer.podspec         # iOS CocoaPods spec
-├── package.json                  # Package manifest + codegen config
-└── turbo.json                    # Turbo task definitions
+├── LibyuvResizer.podspec
+├── package.json
+└── turbo.json
 ```
 
 ## Module Organization
@@ -44,24 +64,27 @@ rn-libyuv-resizer/
 
 **Purpose:** Public API, TurboModule spec, platform routing  
 **Key files:**
-- `NativeLibyuvResizer.ts` — codegen source; defines the native method signatures
-- `index.tsx` — only public entry point for consumers
-- `multiply.native.tsx` / `multiply.tsx` — platform split pattern
+- `NativeLibyuvResizer.ts` — codegen source; defines native method signatures; handles arch detection for legacy bridge fallback
+- `index.tsx` — only public entry point (`resize`, `ResizeOptions`, `ResizeMode`, `FilterMode`, `RotationAngle`)
+- `resizer.native.tsx` — validates options, normalises rotation, calls `NativeLibyuvResizer`
+- `resizer.tsx` — throws "native-only" error on web
 
 ### Android Native (`android/`)
 
-**Purpose:** Kotlin TurboModule implementation + package registration  
+**Purpose:** Kotlin TurboModule + JNI C++ layer  
 **Key files:**
-- `LibyuvResizerModule.kt` — implements native methods
-- `LibyuvResizerPackage.kt` — registers module with RN
-- `build.gradle` — library config; will gain `externalNativeBuild` when C++ is added
+- `LibyuvResizerModule.kt` — orchestrates decode → JNI → encode; calls validator and dim calculator
+- `LibyuvResizerPackage.kt` — dual-arch package registration via `TurboReactPackage`
+- `DimensionCalculator.kt` — pure Kotlin, no Android deps; testable dimension math
+- `ResizeValidator.kt` — sealed `ValidationResult`; independently unit-testable
+- `cpp/LibyuvResizerModule.cpp` — JNI: `nativeResize` and `nativeResizeAndRotate` via libyuv
 
 ### iOS Native (`ios/`)
 
-**Purpose:** ObjC++ TurboModule implementation  
+**Purpose:** ObjC++ TurboModule + legacy bridge stub  
 **Key files:**
 - `LibyuvResizer.h` — imports codegen spec header
-- `LibyuvResizer.mm` — implements methods, returns JSI TurboModule shared_ptr
+- `LibyuvResizer.mm` — dual-mode: JSI `getTurboModule:` + `RCT_EXPORT_METHOD` for legacy
 
 ### Build Output (`lib/`)
 
@@ -71,8 +94,10 @@ rn-libyuv-resizer/
 ## Where Things Live
 
 **Native API contract:** `src/NativeLibyuvResizer.ts` → codegen → platform stubs  
-**Android implementation:** `android/src/main/java/com/libyuvresizer/`  
+**Android Kotlin:** `android/src/main/java/com/libyuvresizer/`  
+**Android C++ (JNI):** `android/src/main/cpp/`  
+**Android build config:** `android/CMakeLists.txt`, `android/build.gradle`  
+**libyuv source:** `libyuv/` (git submodule)  
 **iOS implementation:** `ios/`  
-**C++ (planned):** `android/src/main/cpp/` + `android/CMakeLists.txt`; root `libyuv/` submodule  
 **CI pipelines:** `.github/workflows/ci.yml`  
 **iOS pod config:** `LibyuvResizer.podspec` (root)

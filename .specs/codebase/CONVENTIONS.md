@@ -3,24 +3,24 @@
 ## Naming Conventions
 
 **Files:**
-- TypeScript: `PascalCase` for specs/components (`NativeLibyuvResizer.ts`), `camelCase.native.tsx` for platform splits
-- Kotlin: `PascalCase` matching class name (`LibyuvResizerModule.kt`)
+- TypeScript: `PascalCase` for specs (`NativeLibyuvResizer.ts`), `camelCase.native.tsx` for platform splits (`resizer.native.tsx`)
+- Kotlin: `PascalCase` matching class name (`LibyuvResizerModule.kt`, `DimensionCalculator.kt`, `ResizeValidator.kt`)
 - ObjC++: `PascalCase` matching class (`LibyuvResizer.mm`, `LibyuvResizer.h`)
 
 **Functions/Methods:**
-- TypeScript: `camelCase` (`multiply`, `resizeImage`)
-- Kotlin: `camelCase` (`override fun multiply(a: Double, b: Double)`)
-- ObjC++: selector style (`- (NSNumber *)multiply:(double)a b:(double)b`)
+- TypeScript: `camelCase` (`resize`, `toCanonicalAngle`)
+- Kotlin: `camelCase` (`override fun resize(...)`, `computeDstDims`, `validate`)
+- ObjC++: selector style (`- (void)resize:(NSString *)filePath ...`)
 
 **Constants:**
-- Kotlin: `const val NAME` in `companion object` — SCREAMING_SNAKE not used; `NAME` follows RN convention
+- Kotlin: `const val NAME` in `companion object` — follows RN convention; `SCREAMING_SNAKE` for private maps (`FILTER_MODE_MAP`)
 
-**Module name string:** `"LibyuvResizer"` — used as the JS-side TurboModule registry key and must match across `TurboModuleRegistry.getEnforcing`, `LibyuvResizerModule.NAME`, and `+ (NSString *)moduleName`.
+**Module name string:** `"LibyuvResizer"` — must match across `TurboModuleRegistry.getEnforcing`, `LibyuvResizerModule.NAME`, and `+ (NSString *)moduleName`.
 
 ## Code Organization
 
 **Import ordering (TypeScript):**  
-React Native imports first, then local imports. No explicit grouping separator observed yet.
+React Native imports first, then local imports.
 
 **File structure (Kotlin):**
 ```kotlin
@@ -31,32 +31,39 @@ package com.libyuvresizer
 class LibyuvResizerModule(reactContext: ReactApplicationContext) :
   NativeLibyuvResizerSpec(reactContext) {
 
-  override fun methodName(...): ReturnType { ... }
-
   companion object {
     const val NAME = NativeLibyuvResizerSpec.NAME
+    init { System.loadLibrary("libyuvresizer") }
   }
+
+  private external fun nativeResize(...)
+  override fun resize(..., promise: Promise) { ... }
 }
 ```
 
+**Kotlin utilities extracted for testability:**  
+Pure logic (no Android deps) lives in `DimensionCalculator` and `ResizeValidator` — `LibyuvResizerModule` calls into them.
+
 ## Type Safety
 
-- TypeScript: strict mode via `tsconfig.json`; no `any` in spec files
-- Kotlin: null-safe; native params from codegen are non-nullable primitives
+- TypeScript: strict mode via `tsconfig.json`; no `any` in spec files; string literal unions for `ResizeMode`, `FilterMode`, `RotationAngle`
+- Kotlin: null-safe; sealed `ValidationResult` eliminates unchecked error handling; `requireNotNull` over `!!`
 - ObjC++: codegen-generated spec header enforced; no `id` returns on typed methods
 
 ## Error Handling
 
-- Web/non-native fallback (`multiply.tsx`): throws `Error` with explicit message `"'react-native-libyuv-resizer' is only supported on native platforms."`
-- Turbo Module: `TurboModuleRegistry.getEnforcing` — throws at startup if native side missing (fail-fast, not silent)
+- Web/non-native fallback (`resizer.tsx`): throws `Error("'react-native-libyuv-resizer' is only supported on native platforms.")`
+- JS validation (`resizer.native.tsx`): `Promise.reject(new TypeError(...))` for invalid `mode` / `filterMode`
+- Android: `ResizeValidator` returns `ValidationResult.Invalid(code, message)`; module calls `promise.reject(code, message)` and returns early
+- `TurboModuleRegistry.getEnforcing` — throws at startup if native side missing
 
 ## Commit Style
 
 Conventional commits enforced by commitlint + lefthook:
 ```
-feat: add image resize API
-fix: correct rotation matrix on arm64
-chore: update libyuv submodule to daeff19
+feat: add filterMode param to resize API
+fix: initialize libyuv submodule on Android CI checkout
+chore: update CLAUDE.md dev guidelines
 ```
 Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
 
@@ -71,3 +78,9 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
   "useTabs": false
 }
 ```
+
+## Sentinel Values
+
+- `outputPath = ''` (empty string) signals "no custom path" — TurboModule bridge requires fixed-arity positional args; nullable strings are not supported.
+- `rotation = 0` default — JS normalises negative angles to `0|90|180|270` before sending to native.
+- `quality = 100` → PNG output; else JPEG — single `quality` param drives format selection without a separate API param.
