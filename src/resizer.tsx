@@ -6,6 +6,15 @@ export type {
   ResizeOptions,
 } from './resizer.native';
 
+/**
+ * Web / non-native fallback for {@link resize}.
+ *
+ * This module is selected by Metro on platforms other than Android/iOS.
+ * It always rejects because `react-native-libyuv-resizer` requires a native
+ * runtime. Import the real implementation via the `.native` platform extension.
+ *
+ * @throws {Error} Always — native platform required.
+ */
 export function resize(
   _filePath: string,
   _targetWidth: number,

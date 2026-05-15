@@ -1,23 +1,104 @@
 import LibyuvResizer from './NativeLibyuvResizer';
 
+/**
+ * Valid rotation values in degrees.
+ * Negative angles are normalised to their positive equivalents before being
+ * sent to the native layer (`-90` → `270`, etc.).
+ */
 export type RotationAngle = 0 | 90 | 180 | 270 | -90 | -180 | -270;
+
+/**
+ * Controls how the source image is fitted into the target bounding box.
+ *
+ * - `'contain'` — scales uniformly so the entire image fits within the box,
+ *   preserving aspect ratio. Empty space is left uncropped.
+ * - `'cover'` — scales uniformly so the image fills the box, preserving
+ *   aspect ratio. Excess pixels are cropped.
+ * - `'stretch'` — scales to exactly `targetWidth × targetHeight`, ignoring
+ *   aspect ratio.
+ */
 export type ResizeMode = 'contain' | 'cover' | 'stretch';
+
+/**
+ * Scaling filter applied during the resize operation.
+ *
+ * Higher quality filters are slower. Choose based on your latency vs quality
+ * requirements.
+ *
+ * - `'none'` — nearest-neighbour; fastest, lowest quality.
+ * - `'linear'` — linear interpolation.
+ * - `'bilinear'` — bilinear interpolation.
+ * - `'box'` — box filter; best quality for downscaling *(default)*.
+ */
 export type FilterMode = 'none' | 'linear' | 'bilinear' | 'box';
 
+/** Options accepted by {@link resize}. */
 export interface ResizeOptions {
+  /**
+   * Clockwise rotation applied to the image **before** resizing.
+   * @default 0
+   */
   rotation?: RotationAngle;
+
+  /**
+   * How the image is fitted into the target bounding box.
+   * @default 'contain'
+   */
   mode?: ResizeMode;
-  outputPath?: string;
+
+  /**
+   * Scaling filter used during the resize operation.
+   * @default 'box'
+   */
   filterMode?: FilterMode;
+
+  /**
+   * Absolute path for the output file.
+   * When omitted the native layer generates a path in the app's cache
+   * directory automatically.
+   */
+  outputPath?: string;
 }
 
 const VALID_MODES: ResizeMode[] = ['contain', 'cover', 'stretch'];
 const VALID_FILTER_MODES: FilterMode[] = ['none', 'linear', 'bilinear', 'box'];
 
+/** Normalises negative or out-of-range angles to 0 | 90 | 180 | 270. */
 function toCanonicalAngle(angle: RotationAngle): 0 | 90 | 180 | 270 {
   return (((angle % 360) + 360) % 360) as 0 | 90 | 180 | 270;
 }
 
+/**
+ * Resizes an image using the libyuv native backend (Android).
+ *
+ * The source image is read from `filePath`, resized to the requested
+ * dimensions, and saved as a JPEG. The absolute path of the output file is
+ * returned on success.
+ *
+ * @param filePath - Absolute path to the source image.
+ * @param targetWidth - Output width in pixels (must be > 0).
+ * @param targetHeight - Output height in pixels (must be > 0).
+ * @param quality - JPEG encoding quality from `0` (lowest) to `100` (highest).
+ *   Only applies to the JPEG output; the resize itself is lossless.
+ * @param options - Optional resize behaviour overrides.
+ * @returns A `Promise` that resolves to the absolute path of the resized image.
+ * @throws {TypeError} When `options.mode` or `options.filterMode` is not one
+ *   of the accepted string literals.
+ *
+ * @example
+ * ```ts
+ * // Basic resize
+ * const output = await resize('/path/to/photo.jpg', 1280, 720, 85);
+ *
+ * // With options
+ * const output = await resize('/path/to/photo.jpg', 800, 600, 80, {
+ *   rotation: 90,
+ *   mode: 'cover',
+ *   filterMode: 'bilinear',
+ *   outputPath: '/path/to/output.jpg',
+ * });
+ * ```
+ */
 export function resize(
   filePath: string,
   targetWidth: number,
