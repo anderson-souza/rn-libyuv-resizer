@@ -5,6 +5,26 @@ import {
 } from 'react-native';
 
 /**
+ * Metadata returned by the native `resize()` bridge call.
+ *
+ * All numeric fields reflect the **output** file / bitmap — not the source.
+ */
+export type ResizeResult = {
+  /** Absolute path of the resized image file. */
+  path: string;
+  /** `file://` URI of the resized image file. */
+  uri: string;
+  /** File size in bytes. */
+  size: number;
+  /** File name (e.g. `"a3f2…1c.jpg"`). */
+  name: string;
+  /** Output bitmap width in pixels. */
+  width: number;
+  /** Output bitmap height in pixels. */
+  height: number;
+};
+
+/**
  * Turbo Module contract for the native `LibyuvResizer` implementation.
  *
  * **Do not call this interface directly.** Use the public {@link resize}
@@ -27,7 +47,7 @@ export interface Spec extends TurboModule {
    * @param mode        - Resize mode string (`'contain' | 'cover' | 'stretch'`).
    * @param outputPath  - Absolute output path, or empty string for auto.
    * @param filterMode  - Scaling filter (`'none' | 'linear' | 'bilinear' | 'box'`).
-   * @returns Absolute path of the resized image.
+   * @returns Metadata about the resized image.
    */
   resize(
     filePath: string,
@@ -38,7 +58,7 @@ export interface Spec extends TurboModule {
     mode: string,
     outputPath: string,
     filterMode: string
-  ): Promise<string>;
+  ): Promise<ResizeResult>;
 }
 
 const isTurboModuleEnabled =

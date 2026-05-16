@@ -8,6 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.facebook.react.bridge.ReadableMap
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
@@ -53,7 +54,7 @@ class LibyuvResizerModuleRotationTest {
     val promise = resize(landscapeSrc, 300.0, 300.0, 0.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue("output file must exist", File(outPath).exists())
     val (w, h) = TestFixtures.decodeDimensions(outPath)
@@ -69,7 +70,7 @@ class LibyuvResizerModuleRotationTest {
     val promise = resize(landscapeSrc, 300.0, 300.0, 90.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val (w, h) = TestFixtures.decodeDimensions(outPath)
     assertEquals(150, w)
@@ -83,7 +84,7 @@ class LibyuvResizerModuleRotationTest {
     val promise = resize(landscapeSrc, 300.0, 300.0, 180.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val (w, h) = TestFixtures.decodeDimensions(outPath)
     assertEquals(300, w)
@@ -96,7 +97,7 @@ class LibyuvResizerModuleRotationTest {
     val promise = resize(landscapeSrc, 300.0, 300.0, 270.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val (w, h) = TestFixtures.decodeDimensions(outPath)
     assertEquals(150, w)
@@ -110,7 +111,7 @@ class LibyuvResizerModuleRotationTest {
     val promise = resize(landscapeSrc, 120.0, 80.0, 90.0, mode = "stretch")
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val (w, h) = TestFixtures.decodeDimensions(outPath)
     assertEquals(120, w)

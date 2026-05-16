@@ -1,4 +1,6 @@
-import LibyuvResizer from './NativeLibyuvResizer';
+import LibyuvResizer, { type ResizeResult } from './NativeLibyuvResizer';
+
+export type { ResizeResult };
 
 /**
  * Valid rotation values in degrees.
@@ -81,17 +83,19 @@ function toCanonicalAngle(angle: RotationAngle): 0 | 90 | 180 | 270 {
  * @param quality - JPEG encoding quality from `0` (lowest) to `100` (highest).
  *   Only applies to the JPEG output; the resize itself is lossless.
  * @param options - Optional resize behaviour overrides.
- * @returns A `Promise` that resolves to the absolute path of the resized image.
+ * @returns A `Promise` that resolves to a {@link ResizeResult} with the output
+ *   file path, URI, size, name, and dimensions.
  * @throws {TypeError} When `options.mode` or `options.filterMode` is not one
  *   of the accepted string literals.
  *
  * @example
  * ```ts
  * // Basic resize
- * const output = await resize('/path/to/photo.jpg', 1280, 720, 85);
+ * const result = await resize('/path/to/photo.jpg', 1280, 720, 85);
+ * console.log(result.path, result.width, result.height);
  *
  * // With options
- * const output = await resize('/path/to/photo.jpg', 800, 600, 80, {
+ * const result = await resize('/path/to/photo.jpg', 800, 600, 80, {
  *   rotation: 90,
  *   mode: 'cover',
  *   filterMode: 'bilinear',
@@ -105,7 +109,7 @@ export function resize(
   targetHeight: number,
   quality: number,
   options?: ResizeOptions
-): Promise<string> {
+): Promise<ResizeResult> {
   const rotation =
     options?.rotation != null ? toCanonicalAngle(options.rotation) : 0;
   const mode: ResizeMode = options?.mode ?? 'contain';
