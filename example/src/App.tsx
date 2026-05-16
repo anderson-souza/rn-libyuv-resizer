@@ -81,13 +81,19 @@ export default function App() {
       const outputs: ResizeResult[] = [];
       for (const mode of MODES) {
         const start = Date.now();
-        const outputPath = await resize(filePath, mode.width, mode.height, 95, {
-          rotation: mode.rotation,
-          mode: 'cover',
-          filterMode: 'none',
-        });
+        const nativeResult = await resize(
+          filePath,
+          mode.width,
+          mode.height,
+          95,
+          {
+            rotation: mode.rotation,
+            mode: 'cover',
+            filterMode: 'box',
+          }
+        );
         outputs.push({
-          outputPath,
+          outputPath: nativeResult.path,
           inputSize: { width: asset.width ?? 0, height: asset.height ?? 0 },
           elapsedMs: Date.now() - start,
           label: mode.label,

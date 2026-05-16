@@ -8,10 +8,16 @@
  * ```ts
  * import { resize } from 'react-native-libyuv-resizer';
  *
- * const outputPath = await resize('/path/to/photo.jpg', 1280, 720, 85);
+ * const result = await resize('/path/to/photo.jpg', 1280, 720, 85);
+ * console.log(result.path, result.width, result.height);
  * ```
  *
  * @packageDocumentation
  */
 export { resize } from './resizer';
-export type { RotationAngle, ResizeMode, ResizeOptions } from './resizer';
+export type {
+  RotationAngle,
+  ResizeMode,
+  ResizeOptions,
+  ResizeResult,
+} from './resizer';

@@ -7,6 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.facebook.react.bridge.ReadableMap
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
@@ -42,7 +43,7 @@ class LibyuvResizerModuleFilterModeTest {
   fun resize_filterModeBox_producesValidOutput() {
     val promise = resizeWithFilter("box")
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue(File(outPath).exists())
     val (w, h) = TestFixtures.decodeDimensions(outPath)
@@ -53,7 +54,7 @@ class LibyuvResizerModuleFilterModeTest {
   fun resize_filterModeBilinear_producesValidOutput() {
     val promise = resizeWithFilter("bilinear")
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue(File(outPath).exists())
     val (w, h) = TestFixtures.decodeDimensions(outPath)
@@ -64,7 +65,7 @@ class LibyuvResizerModuleFilterModeTest {
   fun resize_filterModeLinear_producesValidOutput() {
     val promise = resizeWithFilter("linear")
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue(File(outPath).exists())
     val (w, h) = TestFixtures.decodeDimensions(outPath)
@@ -75,7 +76,7 @@ class LibyuvResizerModuleFilterModeTest {
   fun resize_filterModeNone_producesValidOutput() {
     val promise = resizeWithFilter("none")
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue(File(outPath).exists())
     val (w, h) = TestFixtures.decodeDimensions(outPath)
