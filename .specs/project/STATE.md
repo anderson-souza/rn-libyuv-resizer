@@ -7,6 +7,7 @@
 
 ## Active Work
 
+- [ ] Legacy architecture support — spec/design/tasks at `.specs/features/legacy-arch-support/`
 - [x] Add libyuv git submodule
 - [x] Create `android/CMakeLists.txt` with libyuv integration
 - [x] Update `android/build.gradle` with `externalNativeBuild`
