@@ -8,6 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.facebook.react.bridge.ReadableMap
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
@@ -54,7 +55,7 @@ class LibyuvResizerModuleIntegrationTest {
     val promise = resize(src, 300.0, 300.0, 80.0)
 
     assertTrue("expected resolved, got error=${promise.errorCode}: ${promise.errorMessage}", promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue("output file must exist", File(outPath).exists())
     assertTrue("output must be .jpg", outPath.endsWith(".jpg"))
@@ -72,7 +73,7 @@ class LibyuvResizerModuleIntegrationTest {
     val promise = resize(src, 150.0, 150.0, 80.0, mode = "cover")
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val (w, h) = TestFixtures.decodeDimensions(outPath)
     assertEquals(150, w)
@@ -88,7 +89,7 @@ class LibyuvResizerModuleIntegrationTest {
     val promise = resize(src, 300.0, 150.0, 80.0, mode = "stretch")
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val (w, h) = TestFixtures.decodeDimensions(outPath)
     assertEquals(300, w)
@@ -104,7 +105,7 @@ class LibyuvResizerModuleIntegrationTest {
     val promise = resize(src, 50.0, 50.0, 100.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue("output must be .png", outPath.endsWith(".png"))
     val decoded = TestFixtures.decodeDimensions(outPath)
@@ -119,7 +120,7 @@ class LibyuvResizerModuleIntegrationTest {
     val promise = resize(src, 50.0, 50.0, 80.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue("output must be .jpg", outPath.endsWith(".jpg"))
     assertTrue("decoded JPEG must be readable", TestFixtures.decodeDimensions(outPath).first > 0)
@@ -134,7 +135,7 @@ class LibyuvResizerModuleIntegrationTest {
     val promise = resize(src, 400.0, 400.0, 80.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val (w, h) = TestFixtures.decodeDimensions(outPath)
     assertEquals(400, w)
@@ -149,7 +150,7 @@ class LibyuvResizerModuleIntegrationTest {
     val promise = resize(src, 60.0, 60.0, 80.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue(File(outPath).exists())
   }

@@ -8,6 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.facebook.react.bridge.ReadableMap
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
@@ -44,7 +45,7 @@ class LibyuvResizerModuleOutputPathTest {
     val promise = resize(outputPath = "")
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue(
       "output must be inside cacheDir",
@@ -59,7 +60,7 @@ class LibyuvResizerModuleOutputPathTest {
     val promise = resize(outputPath = destDir.absolutePath)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue(
       "output must be inside filesDir",
@@ -76,7 +77,7 @@ class LibyuvResizerModuleOutputPathTest {
     val promise = resize(outputPath = destDir.absolutePath)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     val outputFilename = File(outPath).name
     assertEquals("output_path_src.jpg", outputFilename)
@@ -88,7 +89,7 @@ class LibyuvResizerModuleOutputPathTest {
     val promise = resize(outputPath = "", quality = 100.0)
 
     assertTrue(promise.resolved)
-    val outPath = promise.result as String
+    val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
     assertTrue("output must end with .png", outPath.endsWith(".png"))
     assertTrue(File(outPath).exists())

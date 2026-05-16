@@ -1,9 +1,10 @@
-import type { ResizeOptions } from './resizer.native';
+import type { ResizeOptions, ResizeResult } from './resizer.native';
 
 export type {
   RotationAngle,
   ResizeMode,
   ResizeOptions,
+  ResizeResult,
 } from './resizer.native';
 
 /**
@@ -21,7 +22,7 @@ export function resize(
   _targetHeight: number,
   _quality: number,
   _options?: ResizeOptions
-): Promise<string> {
+): Promise<ResizeResult> {
   return Promise.reject(
     new Error(
       "'react-native-libyuv-resizer' is only supported on native platforms."

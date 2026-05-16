@@ -1,8 +1,18 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import type { ResizeResult } from '../NativeLibyuvResizer';
+
+const MOCK_RESULT: ResizeResult = {
+  path: '/out.jpg',
+  uri: 'file:///out.jpg',
+  size: 1024,
+  name: 'out.jpg',
+  width: 400,
+  height: 225,
+};
 
 const mockResize = jest
-  .fn<(...args: unknown[]) => Promise<string>>()
-  .mockResolvedValue('/out.jpg');
+  .fn<(...args: unknown[]) => Promise<ResizeResult>>()
+  .mockResolvedValue(MOCK_RESULT);
 
 jest.mock('../NativeLibyuvResizer', () => ({
   __esModule: true,
@@ -190,5 +200,19 @@ describe('outputPath', () => {
       '/sdcard/Pictures',
       'box'
     );
+  });
+});
+
+describe('return value shape', () => {
+  it('resolves ResizeResult with all 6 fields', async () => {
+    const result = await resize('/img.jpg', 400, 400, 80);
+    expect(result).toEqual({
+      path: MOCK_RESULT.path,
+      uri: MOCK_RESULT.uri,
+      size: MOCK_RESULT.size,
+      name: MOCK_RESULT.name,
+      width: MOCK_RESULT.width,
+      height: MOCK_RESULT.height,
+    });
   });
 });

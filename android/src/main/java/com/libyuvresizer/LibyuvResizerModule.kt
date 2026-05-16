@@ -2,6 +2,8 @@ package com.libyuvresizer
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import java.io.File
@@ -96,7 +98,15 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
             dstBitmap.compress(fmt, q, fos)
           }
 
-          promise.resolve(outFile.absolutePath)
+          val result = Arguments.createMap().apply {
+            putString("path", outFile.absolutePath)
+            putString("uri", Uri.fromFile(outFile).toString())
+            putDouble("size", outFile.length().toDouble())
+            putString("name", outFile.name)
+            putInt("width", dstBitmap.width)
+            putInt("height", dstBitmap.height)
+          }
+          promise.resolve(result)
         } finally {
           dstBitmap.recycle()
         }
